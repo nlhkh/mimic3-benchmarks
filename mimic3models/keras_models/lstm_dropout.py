@@ -91,7 +91,7 @@ class Network(Model):
         super(Network, self).__init__(inputs=inputs, outputs=outputs)
 
     def say_name(self):
-        return "{}.n{}{}{}{}.dep{}".format('k_lstm',
+        return "{}.n{}{}{}{}.dep{}".format('k_lstm_stochastic',
                                            self.dim,
                                            ".bn" if self.batch_norm else "",
                                            ".d{}".format(self.dropout) if self.dropout > 0 else "",
