@@ -10,10 +10,11 @@
 
 model=$1
 dropout=$2
-mode=$3
+rdropout=$3
+mode=$4
 
 module load anaconda3
 source activate mimic3
 
-srun python -um mimic3models.phenotyping.main --network mimic3models/keras_models/$model.py --dim 256 --timestep 1.0 --depth 1 --dropout $dropout --mode $mode --batch_size 8 --output_dir mimic3models/phenotyping
+srun python -um mimic3models.phenotyping.main --network mimic3models/keras_models/$model.py --dim 256 --timestep 1.0 --depth 1 --dropout $dropout --rec_dropout $rdropout --mode $mode --batch_size 8 --output_dir mimic3models/phenotyping
 
