@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH -t 07:30:00
+#SBATCH -n 1
+#SBATCH --mem=4G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=kha.nguyen@aalto.fi
+
+task=$1
+
+module load anaconda
+
+if [ $task == 'in-hospital-mortality' ]
+then
+    srun python -um mimic3models.in_hospital_mortality.logistic.main --l2 --C 0.001 --output_dir mimic3models/in_hospital_mortality/logistic
+
+elif [ $task == 'decompensation' ]
+then
+    srun python -um mimic3models.decompensation.logistic.main --output_dir mimic3models/decompensation/logistic
+
+elif [ $task == 'length-of-stay' ]
+then
+    srun python -um mimic3models.length_of_stay.logistic.main_cf --output_dir mimic3models/length_of_stay/logistic
+
+elif [ $task == 'phenotype' ]
+then
+    srun python -um mimic3models.phenotyping.logistic.main --output_dir mimic3models/phenotyping/logistic
+
+else
+    echo Unknown task $task
+fi
+
