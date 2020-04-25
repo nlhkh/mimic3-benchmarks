@@ -478,3 +478,48 @@ class ExtendMask(Layer):
 
     def get_config(self):
         return {'add_epsilon': self.add_epsilon}
+
+
+# ===================== MCVB ===================== #
+from keras.layers import Lambda
+from keras.layers.wrappers import TimeDistributed
+from keras.models import Model
+
+
+def get_mc_model(model, sample:int=10):
+    td_input = Lambda(lambda x: K.tile(K.expand_dims(x, axis=1), [1, sample, 1, 1]), name='expand_input')(model.input)
+    return Model(inputs=model.input, outputs=[TimeDistributed(Model(inputs=model.input, outputs=output))(td_input) for output in model.outputs])
+
+### Classification
+class MCBCUtils:
+    @classmethod
+    def aleatoric_uncertainty(cls, prop):
+        return np.mean(prop * (1.-prop), axis=1)
+    
+    @classmethod
+    def mean_aleatoric_uncertainty(cls, prop):
+        return np.mean(cls.aleatoric_uncertainty(prop))
+
+    @classmethod
+    def print_aleatoric_uncertainty(cls, prop):
+        print("Aleatoric uncertainty = %f" % cls.mean_aleatoric_uncertainty(prop))
+
+    @classmethod
+    def epistemic_uncertainty(cls, prop):
+        return np.var(prop, axis=1)
+    
+    @classmethod
+    def mean_epistemic_uncertainty(cls, prop):
+        return np.mean(cls.epistemic_uncertainty(prop))
+    
+    @classmethod
+    def print_epistemic_uncertainty(cls, prop):
+        print("Epistemic uncertainty = %f" % cls.mean_epistemic_uncertainty(prop))
+
+    @classmethod
+    def uncertainty(cls, prop):
+        return cls.aleatoric_uncertainty(prop) + cls.epistemic_uncertainty(prop)
+
+    @classmethod
+    def score_avg(cls, prop):
+        return np.mean(prop, axis=1)

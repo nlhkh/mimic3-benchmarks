@@ -83,6 +83,8 @@ def add_common_arguments(parser):
                         help='state file path')
     parser.add_argument('--mode', type=str, default="train",
                         help='mode: train or test')
+    parser.add_argument('--mc', type=int, default=0,
+                        help='mc: number of Monte Carlo simulation')
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--l2', type=float, default=0, help='L2 regularization')
     parser.add_argument('--l1', type=float, default=0, help='L1 regularization')

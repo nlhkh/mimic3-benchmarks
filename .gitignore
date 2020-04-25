@@ -2,6 +2,11 @@
 .idea
 miscellaneous
 notebook
+.DS_Store
+settings.json
+
+# data
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
