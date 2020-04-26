@@ -17,4 +17,3 @@ module load anaconda3
 source activate mimic3
 
 srun python -um mimic3models.multitask.main --network mimic3models/keras_models/multitask_$model.py --dim 512 --timestep 1 --mode $mode --batch_size 16 --dropout $dropout --rec_dropout $rdropout --ihm_C 0.2 --decomp_C 1.0 --los_C 1.5 --pheno_C 1.0 --output_dir mimic3models/multitask
-

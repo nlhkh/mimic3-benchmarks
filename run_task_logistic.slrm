@@ -28,4 +28,3 @@ then
 else
     echo Unknown task $task
 fi
-
