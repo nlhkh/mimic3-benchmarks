@@ -16,6 +16,7 @@ from mimic3models import keras_utils
 from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
+from mimic3models.keras_utils import ModelPrintDropoutRates
 
 parser = argparse.ArgumentParser()
 common_utils.add_common_arguments(parser)
@@ -141,6 +142,8 @@ if args.mode == 'train':
         os.makedirs(keras_logs)
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
+    
+    print_dropout_callback = ModelPrintDropoutRates()
 
     print("==> training")
     model.fit(x=train_raw[0],
@@ -148,7 +151,7 @@ if args.mode == 'train':
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
               initial_epoch=n_trained_chunks,
-              callbacks=[metrics_callback, saver, csv_logger],
+              callbacks=[metrics_callback, saver, csv_logger, print_dropout_callback],
               shuffle=True,
               verbose=args.verbose,
               batch_size=args.batch_size)

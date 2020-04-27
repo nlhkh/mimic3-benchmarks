@@ -525,15 +525,16 @@ class MCBCUtils:
         return np.mean(prop, axis=1)
 
 
-def print_dropout_rates(model):
-    for layer in model.layers:
-        if hasattr(layer, 'dropout'):
-            if layer.dropout == 1.0:
-                print(layer.name, 'dropout =', layer.p.numpy())
-            else:
-                print(layer.name, 'dropout =', layer.p)
-        if hasattr(layer, 'recurrent_dropout'):
-            if layer.recurrent_dropout == 1.0:
-                print(layer.name, 'recurrent_dropout =', layer.p_r.numpy())
-            else:
-                print(layer.name, 'recurrent_dropout =', layer.p_r)
+class ModelPrintDropoutRates(keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        for layer in self.model.layers:
+            if hasattr(layer, 'dropout'):
+                if layer.dropout == 1.0:
+                    print(layer.name, 'dropout =', layer.p.numpy())
+                else:
+                    print(layer.name, 'dropout =', layer.p)
+            if hasattr(layer, 'recurrent_dropout'):
+                if layer.recurrent_dropout == 1.0:
+                    print(layer.name, 'recurrent_dropout =', layer.p_r.numpy())
+                else:
+                    print(layer.name, 'recurrent_dropout =', layer.p_r)
