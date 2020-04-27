@@ -525,16 +525,32 @@ class MCBCUtils:
         return np.mean(prop, axis=1)
 
 
+from keras.layers.wrappers import TimeDistributed, Bidirectional
+from keras.models import Model
+
 class ModelPrintDropoutRates(keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs=None):
-        for layer in self.model.layers:
-            if hasattr(layer, 'dropout'):
+    def _print_dropout_rates(self, layers=[]):
+        for layer in layers:
+            if isinstance(layer, Bidirectional):
+                self._print_dropout_rates([layer.forward_layer])
+                self._print_dropout_rates([layer.backward_layer])
+            elif isinstance(layer, TimeDistributed):
+                if isinstance(layer.layer, Model):
+                    self._print_dropout_rates(layer.layer.layers)
+                else:
+                    self._print_dropout_rates([layer.layer])
+            elif hasattr(layer, 'dropout'):
                 if layer.dropout == 1.0:
                     print(layer.name, 'dropout =', layer.p.numpy())
                 else:
                     print(layer.name, 'dropout =', layer.p)
-            if hasattr(layer, 'recurrent_dropout'):
+            elif hasattr(layer, 'recurrent_dropout'):
                 if layer.recurrent_dropout == 1.0:
                     print(layer.name, 'recurrent_dropout =', layer.p_r.numpy())
                 else:
                     print(layer.name, 'recurrent_dropout =', layer.p_r)
+            else:
+                pass
+
+    def on_epoch_end(self, epoch, logs=None):
+        self._print_dropout_rates(self.model.layers)
