@@ -539,18 +539,10 @@ class ModelPrintDropoutRates(keras.callbacks.Callback):
                     self._print_dropout_rates(layer.layer.layers)
                 else:
                     self._print_dropout_rates([layer.layer])
-            elif hasattr(layer, 'dropout'):
-                if layer.dropout == 1.0:
-                    print(layer.name, 'dropout =', layer.p.numpy())
-                else:
-                    print(layer.name, 'dropout =', layer.p)
-            elif hasattr(layer, 'recurrent_dropout'):
-                if layer.recurrent_dropout == 1.0:
-                    print(layer.name, 'recurrent_dropout =', layer.p_r.numpy())
-                else:
-                    print(layer.name, 'recurrent_dropout =', layer.p_r)
-            else:
-                pass
+            elif hasattr(layer, 'dropout') and layer.dropout == 1.0:
+                print(layer.name, 'dropout =', layer.p.numpy())
+            elif hasattr(layer, 'recurrent_dropout') and layer.recurrent_dropout == 1.0:
+                print(layer.name, 'recurrent_dropout =', layer.p_r.numpy())
 
     def on_epoch_end(self, epoch, logs=None):
         self._print_dropout_rates(self.model.layers)
