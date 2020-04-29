@@ -16,6 +16,7 @@ from mimic3models import keras_utils
 from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
+from mimic3models.keras_utils import ModelPrintDropoutRates
 
 
 parser = argparse.ArgumentParser()
@@ -141,6 +142,8 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
+    print_dropout_callback = ModelPrintDropoutRates()
+
     print("==> training")
     model.fit_generator(generator=train_data_gen,
                         steps_per_epoch=train_data_gen.steps,
@@ -148,7 +151,7 @@ if args.mode == 'train':
                         validation_steps=val_data_gen.steps,
                         epochs=n_trained_chunks + args.epochs,
                         initial_epoch=n_trained_chunks,
-                        callbacks=[metrics_callback, saver, csv_logger],
+                        callbacks=[metrics_callback, saver, csv_logger, print_dropout_callback],
                         verbose=args.verbose)
 
 elif args.mode == 'test':
