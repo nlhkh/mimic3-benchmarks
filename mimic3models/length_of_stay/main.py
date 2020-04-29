@@ -212,9 +212,9 @@ elif args.mode == 'test':
 
             pred = model.predict(x, batch_size=args.batch_size)
             if pred.shape[-1] == 1:  # regression
-                pred_flatten = pred.flatten()
+                pred_flatten = pred.reshape(pred.shape[0], -1)
             else:  # classification
-                pred_flatten = pred.reshape((-1, 10))
+                pred_flatten = pred.reshape(pred.shape[0], -1, 10)
             for m, t, p, name in zip(x[1].flatten(), y.flatten(), pred_flatten, cur_names.flatten()):
                 if np.equal(m, 1):
                     labels.append(t)

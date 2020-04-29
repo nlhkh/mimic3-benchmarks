@@ -16,7 +16,7 @@ from mimic3models import keras_utils
 from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
-from mimic3models.keras_utils import ModelPrintDropoutRates
+from mimic3models.keras_utils import ModelPrintDropoutRates, get_mc_model
 
 
 parser = argparse.ArgumentParser()
@@ -155,7 +155,11 @@ if args.mode == 'train':
                         verbose=args.verbose)
 
 elif args.mode == 'test':
-
+    # Make MC version of model
+    if args.mc:
+        model = get_mc_model(model, args.mc)
+    stochastic = args.mc > 0
+    
     # ensure that the code uses test_reader
     del train_data_gen
     del val_data_gen
@@ -185,7 +189,8 @@ elif args.mode == 'test':
                 ts += single_ts
 
             pred = model.predict(x, batch_size=args.batch_size)
-            for m, t, p, name in zip(x[1].flatten(), y.flatten(), pred.flatten(), cur_names.flatten()):
+            pred = pred.reshape(pred.shape[0], -1)
+            for m, t, p, name in zip(x[1].flatten(), y.flatten(), pred, cur_names.flatten()):
                 if np.equal(m, 1):
                     labels.append(t)
                     predictions.append(p)
@@ -209,15 +214,16 @@ elif args.mode == 'test':
             cur_ts = ret["ts"]
 
             x = np.array(x)
-            pred = model.predict_on_batch(x)[:, 0]
+            pred = model.predict_on_batch(x)
+            pred = np.squeeze(pred)
             predictions += list(pred)
             labels += list(y)
             names += list(cur_names)
             ts += list(cur_ts)
 
-    metrics.print_metrics_binary(labels, predictions)
+    metrics.print_metrics_binary(labels, predictions, stochastic=stochastic)
     path = os.path.join(args.output_dir, 'test_predictions', os.path.basename(args.load_state)) + '.csv'
-    utils.save_results(names, ts, predictions, labels, path)
+    utils.save_results(names, ts, predictions, labels, path, stochastic=stochastic)
 
 else:
     raise ValueError("Wrong value for args.mode")
