@@ -16,6 +16,7 @@ from mimic3models import keras_utils
 from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
+from mimic3models.keras_utils import ModelPrintDropoutRates
 
 
 parser = argparse.ArgumentParser()
@@ -161,6 +162,8 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
+    print_dropout_callback = ModelPrintDropoutRates()
+
     print("==> training")
     model.fit_generator(generator=train_data_gen,
                         steps_per_epoch=train_data_gen.steps,
@@ -168,10 +171,12 @@ if args.mode == 'train':
                         validation_steps=val_data_gen.steps,
                         epochs=n_trained_chunks + args.epochs,
                         initial_epoch=n_trained_chunks,
-                        callbacks=[metrics_callback, saver, csv_logger],
+                        callbacks=[metrics_callback, saver, csv_logger, print_dropout_callback],
                         verbose=args.verbose)
 
 elif args.mode == 'test':
+    from mimic3models.keras_utils import get_mc_model
+
     # ensure that the code uses test_reader
     del train_data_gen
     del val_data_gen
@@ -180,6 +185,11 @@ elif args.mode == 'test':
     ts = []
     labels = []
     predictions = []
+
+    # Make MC version of model
+    if args.mc:
+        model = get_mc_model(model, args.mc)
+    stochastic = args.mc > 0
 
     if args.deep_supervision:
         del train_data_loader
@@ -239,6 +249,11 @@ elif args.mode == 'test':
             names += list(cur_names)
             ts += list(cur_ts)
 
+    if stochastic:
+        aleatoric = [np.mean(x*(1.-x), axis=0) for x in predictions]
+        epistemic = [np.var(x, axis=0) for x in predictions]
+        predictions = [np.mean(x, axis=0) for x in predictions]
+
     if args.partition == 'log':
         predictions = [metrics.get_estimate_log(x, 10) for x in predictions]
         metrics.print_metrics_log_bins(labels, predictions)
@@ -248,9 +263,18 @@ elif args.mode == 'test':
     if args.partition == 'none':
         metrics.print_metrics_regression(labels, predictions)
         predictions = [x[0] for x in predictions]
-
+    
     path = os.path.join(os.path.join(args.output_dir, "test_predictions", os.path.basename(args.load_state)) + ".csv")
-    utils.save_results(names, ts, predictions, labels, path)
+
+    if stochastic:
+        ee = np.mean(np.array(epistemic))
+        aa = np.mean(np.array(aleatoric))
+        print("Epistemic uncertainty =", ee)
+        print("Aleatoric uncertainty =", aa)
+        print("Uncertainty =", ee + aa)
+        utils.save_results(names, ts, predictions, labels, path, aleatoric=aleatoric, epistemic=epistemic)
+    else:
+        utils.save_results(names, ts, predictions, labels, path)
 
 else:
     raise ValueError("Wrong value for args.mode")

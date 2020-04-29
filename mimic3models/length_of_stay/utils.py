@@ -228,9 +228,15 @@ class BatchGenDeepSupervision(object):
         return self.next()
 
 
-def save_results(names, ts, pred, y_true, path):
+def save_results(names, ts, pred, y_true, path, aleatoric=None, epistemic=None):
     common_utils.create_directory(os.path.dirname(path))
+    
     with open(path, 'w') as f:
-        f.write("stay,period_length,prediction,y_true\n")
-        for (name, t, x, y) in zip(names, ts, pred, y_true):
-            f.write("{},{:.6f},{:.6f},{:.6f}\n".format(name, t, x, y))
+        if aleatoric is not None and epistemic is not None:
+            f.write("stay,period_length,prediction,y_true,epistemic,aleatoric,uncertainty\n")
+            for (name, t, x, y, e, a) in zip(names, ts, pred, y_true, epistemic, aleatoric):
+                f.write("{},{:.6f},{:.6f},{:.6f},{:.6f},{:.6f},{:.6f}\n".format(name, t, x, y, e, a, e+a))
+        else:
+            f.write("stay,period_length,prediction,y_true\n")
+            for (name, t, x, y) in zip(names, ts, pred, y_true):
+                f.write("{},{:.6f},{:.6f},{:.6f}\n".format(name, t, x, y))
