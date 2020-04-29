@@ -157,7 +157,7 @@ if args.mode == 'train':
               batch_size=args.batch_size)
 
 elif args.mode == 'test':
-    from mimic3models.keras_utils import get_mc_model, MCBCUtils
+    from mimic3models.keras_utils import get_mc_model
 
     # ensure that the code uses test_reader
     del train_reader
@@ -178,22 +178,14 @@ elif args.mode == 'test':
     # Make MC version of model
     if args.mc:
         model = get_mc_model(model, args.mc)
+    stochastic = args.mc > 0
 
     predictions = model.predict(data, batch_size=args.batch_size, verbose=1)
 
-    if args.mc:
-        pred_dist = predictions
-        predictions = MCBCUtils.score_avg(pred_dist)
-        
-        # print uncertainties
-        MCBCUtils.print_epistemic_uncertainty(pred_dist)
-        MCBCUtils.print_aleatoric_uncertainty(pred_dist)
-
-    predictions = np.array(predictions)[:, 0]
-    metrics.print_metrics_binary(labels, predictions)
-
+    predictions = np.squeeze(predictions)
+    metrics.print_metrics_binary(labels, predictions, stochastic=stochastic)
     path = os.path.join(args.output_dir, "test_predictions", os.path.basename(args.load_state)) + ".csv"
-    utils.save_results(names, predictions, labels, path)
+    utils.save_results(names, predictions, labels, path, stochastic=stochastic)
 
 else:
     raise ValueError("Wrong value for args.mode")

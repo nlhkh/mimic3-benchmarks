@@ -24,9 +24,21 @@ def load_data(reader, discretizer, normalizer, small_part=False, return_names=Fa
     return {"data": whole_data, "names": names}
 
 
-def save_results(names, pred, y_true, path):
+def save_results(names, pred, y_true, path, stochastic=False):
     common_utils.create_directory(os.path.dirname(path))
-    with open(path, 'w') as f:
-        f.write("stay,prediction,y_true\n")
-        for (name, x, y) in zip(names, pred, y_true):
-            f.write("{},{:.6f},{}\n".format(name, x, y))
+
+    if stochastic:
+        with open(path, 'w') as f:
+            aleatoric = np.mean(pred * (1. - pred), axis=1)
+            epistemic = np.var(pred, axis=1)
+            pred = np.mean(pred, axis=1)
+            uncertainty = aleatoric + epistemic
+
+            f.write("stay,prediction,y_true,aleatoric,epistemic,uncertainty\n")
+            for (name, x, y, a, e, u) in zip(names, pred, y_true, aleatoric, epistemic, uncertainty):
+                f.write("{},{:.6f},{},{:.6f},{:.6f},{:.6f}\n".format(name, x, y, a, e, u))
+    else:
+        with open(path, 'w') as f:
+            f.write("stay,prediction,y_true\n")
+            for (name, x, y) in zip(names, pred, y_true):
+                f.write("{},{:.6f},{}\n".format(name, x, y))

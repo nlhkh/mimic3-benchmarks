@@ -7,8 +7,13 @@ from sklearn import metrics
 
 # for decompensation, in-hospital mortality
 
-def print_metrics_binary(y_true, predictions, verbose=1):
+def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
     predictions = np.array(predictions)
+    if stochastic:
+        aleatoric = np.mean(predictions * (1. - predictions))
+        epistemic = np.var(predictions, axis=1).mean()
+        predictions = np.mean(predictions, axis=1)
+
     if len(predictions.shape) == 1:
         predictions = np.stack([1 - predictions, predictions]).transpose((1, 0))
 
@@ -39,7 +44,12 @@ def print_metrics_binary(y_true, predictions, verbose=1):
         print("AUC of PRC = {}".format(auprc))
         print("min(+P, Se) = {}".format(minpse))
 
-    return {"acc": acc,
+        if stochastic:
+            print("Epistemic uncertainty = {}".format(epistemic))
+            print("Aleatoric uncertainty = {}".format(aleatoric))
+            print("Uncertainty = {}".format(epistemic + aleatoric))
+
+    stats = {"acc": acc,
             "prec0": prec0,
             "prec1": prec1,
             "rec0": rec0,
@@ -47,7 +57,11 @@ def print_metrics_binary(y_true, predictions, verbose=1):
             "auroc": auroc,
             "auprc": auprc,
             "minpse": minpse}
-
+    
+    if stochastic:
+        stats['epis'] = epistemic
+        stats['alea'] = aleatoric
+    return stats
 
 # for phenotyping
 
