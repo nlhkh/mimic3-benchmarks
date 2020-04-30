@@ -151,7 +151,7 @@ if args.mode == 'train':
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
               initial_epoch=n_trained_chunks,
-              callbacks=[metrics_callback, saver, csv_logger, print_dropout_callback],
+              callbacks=[metrics_callback, print_dropout_callback, saver, csv_logger],
               shuffle=True,
               verbose=args.verbose,
               batch_size=args.batch_size)
