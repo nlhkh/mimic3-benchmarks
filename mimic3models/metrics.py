@@ -10,8 +10,8 @@ from sklearn import metrics
 def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
     predictions = np.array(predictions)
     if stochastic:
-        aleatoric = np.mean(predictions * (1. - predictions))
         epistemic = np.var(predictions, axis=1).mean()
+        aleatoric = np.mean(predictions * (1. - predictions))
         predictions = np.mean(predictions, axis=1)
 
     if len(predictions.shape) == 1:
@@ -65,9 +65,14 @@ def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
 
 # for phenotyping
 
-def print_metrics_multilabel(y_true, predictions, verbose=1):
+def print_metrics_multilabel(y_true, predictions, stochastic=False, verbose=1):
     y_true = np.array(y_true)
     predictions = np.array(predictions)
+
+    if stochastic:
+        epistemic = np.var(predictions, axis=1).mean()
+        aleatoric = np.mean(predictions * (1.-predictions))
+        predictions = np.mean(predictions, axis=1)
 
     auc_scores = metrics.roc_auc_score(y_true, predictions, average=None)
     ave_auc_micro = metrics.roc_auc_score(y_true, predictions,
@@ -83,10 +88,20 @@ def print_metrics_multilabel(y_true, predictions, verbose=1):
         print("ave_auc_macro = {}".format(ave_auc_macro))
         print("ave_auc_weighted = {}".format(ave_auc_weighted))
 
-    return {"auc_scores": auc_scores,
+        if stochastic:
+            print("Epistemic uncertainty = {}".format(epistemic))
+            print("Aleatoric uncertainty = {}".format(aleatoric))
+            print("Uncertainty = {}".format(epistemic + aleatoric))
+    
+    stats = {"auc_scores": auc_scores,
             "ave_auc_micro": ave_auc_micro,
             "ave_auc_macro": ave_auc_macro,
             "ave_auc_weighted": ave_auc_weighted}
+    if stochastic:
+        stats["epis"] = epistemic
+        stats["alea"] = aleatoric
+
+    return stats
 
 
 # for length of stay

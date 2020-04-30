@@ -98,19 +98,38 @@ class BatchGen(object):
         return self.next()
 
 
-def save_results(names, ts, predictions, labels, path):
+def save_results(names, ts, predictions, labels, path, stochastic=False):
     n_tasks = 25
     common_utils.create_directory(os.path.dirname(path))
     with open(path, 'w') as f:
         header = ["stay", "period_length"]
         header += ["pred_{}".format(x) for x in range(1, n_tasks + 1)]
         header += ["label_{}".format(x) for x in range(1, n_tasks + 1)]
+        if stochastic:
+            header += ["epistemic_{}".format(x) for x in range(1, n_tasks + 1)]
+            header += ["aleatoric_{}".format(x) for x in range(1, n_tasks + 1)]
         header = ",".join(header)
         f.write(header + '\n')
-        for name, t, pred, y in zip(names, ts, predictions, labels):
-            line = [name]
-            line += ["{:.6f}".format(t)]
-            line += ["{:.6f}".format(a) for a in pred]
-            line += [str(a) for a in y]
-            line = ",".join(line)
-            f.write(line + '\n')
+
+        if stochastic:
+            epistemic = np.var(predictions, axis=1)
+            aleatoric = np.mean(predictions*(1.-predictions), axis=1)
+            predictions = np.mean(predictions, axis=1)
+
+            for name, t, pred, y, epis, alea in zip(names, ts, predictions, labels, epistemic, aleatoric):
+                line = [name]
+                line += ["{:.6f}".format(t)]
+                line += ["{:.6f}".format(a) for a in pred]
+                line += [str(a) for a in y]
+                line += ["{:.6f}".format(e) for e in epis]
+                line += ["{:.6f}".format(a) for a in alea]
+                line = ",".join(line)
+                f.write(line + '\n')
+        else:
+            for name, t, pred, y in zip(names, ts, predictions, labels):
+                line = [name]
+                line += ["{:.6f}".format(t)]
+                line += ["{:.6f}".format(a) for a in pred]
+                line += [str(a) for a in y]
+                line = ",".join(line)
+                f.write(line + '\n')

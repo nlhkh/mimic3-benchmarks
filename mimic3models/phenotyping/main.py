@@ -16,6 +16,7 @@ from mimic3models import keras_utils
 from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
+from mimic3models.keras_utils import ModelPrintDropoutRates
 
 parser = argparse.ArgumentParser()
 common_utils.add_common_arguments(parser)
@@ -129,6 +130,8 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
+    print_dropout_callback = ModelPrintDropoutRates()
+
     print("==> training")
     model.fit_generator(generator=train_data_gen,
                         steps_per_epoch=train_data_gen.steps,
@@ -136,10 +139,15 @@ if args.mode == 'train':
                         validation_steps=val_data_gen.steps,
                         epochs=n_trained_chunks + args.epochs,
                         initial_epoch=n_trained_chunks,
-                        callbacks=[metrics_callback, saver, csv_logger],
+                        callbacks=[metrics_callback, saver, csv_logger, print_dropout_callback],
                         verbose=args.verbose)
 
 elif args.mode == 'test':
+    from mimic3models.keras_utils import get_mc_model
+    # Make MC version of model
+    if args.mc:
+        model = get_mc_model(model, args.mc)
+    stochastic = args.mc > 0
 
     # ensure that the code uses test_reader
     del train_reader
@@ -173,9 +181,9 @@ elif args.mode == 'test':
         names += list(cur_names)
         ts += list(cur_ts)
 
-    metrics.print_metrics_multilabel(labels, predictions)
+    metrics.print_metrics_multilabel(labels, predictions, stochastic=stochastic)
     path = os.path.join(args.output_dir, "test_predictions", os.path.basename(args.load_state)) + ".csv"
-    utils.save_results(names, ts, predictions, labels, path)
+    utils.save_results(names, ts, predictions, labels, path, stochastic=stochastic)
 
 else:
     raise ValueError("Wrong value for args.mode")
