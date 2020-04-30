@@ -145,7 +145,7 @@ if args.mode == 'train':
     
     print_dropout_callback = ModelPrintDropoutRates()
 
-    print("==> training")
+    print("==> training", n_trained_chunks + args.epochs, "epochs")
     model.fit(x=train_raw[0],
               y=train_raw[1],
               validation_data=val_raw,
@@ -155,6 +155,7 @@ if args.mode == 'train':
               shuffle=True,
               verbose=args.verbose,
               batch_size=args.batch_size)
+    print("==> training completed")
 
 elif args.mode == 'test':
     from mimic3models.keras_utils import get_mc_model
