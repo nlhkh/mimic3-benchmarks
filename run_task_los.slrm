@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -t 1-05:00:00
+#SBATCH -t 1-09:00:00
 #SBATCH -n 1
 #SBATCH --gres=gpu:1
 #SBATCH -C 'pascal|kepler|volta'
