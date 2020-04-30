@@ -176,6 +176,10 @@ if args.mode == 'train':
 
 elif args.mode == 'test':
     from mimic3models.keras_utils import get_mc_model
+    # Make MC version of model
+    if args.mc:
+        model = get_mc_model(model, args.mc)
+    stochastic = args.mc > 0
 
     # ensure that the code uses test_reader
     del train_data_gen
@@ -184,12 +188,7 @@ elif args.mode == 'test':
     names = []
     ts = []
     labels = []
-    predictions = []
-
-    # Make MC version of model
-    if args.mc:
-        model = get_mc_model(model, args.mc)
-    stochastic = args.mc > 0
+    predictions = [] 
 
     if args.deep_supervision:
         del train_data_loader
