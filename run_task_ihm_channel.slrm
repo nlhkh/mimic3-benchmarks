@@ -12,8 +12,12 @@ model=$1
 dropout=$2
 rdropout=$3
 mode=$4
+state=${5:-''}
 
 module load anaconda3
 source activate mimic3
 
-srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/channel_wise_$model.py --dim 8 --timestep 1.0 --depth 1 --dropout $dropout --rec_dropout $rdropout --mode $mode --batch_size 8 --output_dir mimic3models/in_hospital_mortality --size_coef 4.0
+srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/channel_wise_$model.py \
+            --dim 8 --timestep 1.0 --depth 1 --dropout $dropout --rec_dropout $rdropout --mode $mode --batch_size 8 \
+            --output_dir mimic3models/in_hospital_mortality --size_coef 4.0
+            --load_state $state
