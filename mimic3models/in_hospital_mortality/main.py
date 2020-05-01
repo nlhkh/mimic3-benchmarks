@@ -142,16 +142,14 @@ if args.mode == 'train':
         os.makedirs(keras_logs)
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
-    
-    print_dropout_callback = ModelPrintDropoutRates()
 
-    print("==> training", n_trained_chunks + args.epochs, "epochs")
+    print("==> training")
     model.fit(x=train_raw[0],
               y=train_raw[1],
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
               initial_epoch=n_trained_chunks,
-              callbacks=[metrics_callback, print_dropout_callback, saver, csv_logger],
+              callbacks=[metrics_callback, saver, csv_logger],
               shuffle=True,
               verbose=args.verbose,
               batch_size=args.batch_size)
