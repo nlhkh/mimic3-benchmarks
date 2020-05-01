@@ -512,4 +512,5 @@ class ModelPrintDropoutRates(keras.callbacks.Callback):
                     print(layer.name, 'recurrent_dropout =', layer.p_r.numpy())
 
     def on_epoch_end(self, epoch, logs=None):
+        print()
         self._print_dropout_rates(self.model.layers)
