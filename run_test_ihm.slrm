@@ -18,5 +18,5 @@ source activate mimic3
 
 srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/$model.py \
             --dim 16 --timestep 1.0 --depth 2 --dropout $dropout --rec_dropout $rdropout --mode test \
-            --batch_size 8 --output_dir mimic3models/in_hospital_mortality \
+            --batch_size 8 --output_dir mimic3models/in_hospital_mortality --mc 10 \
             --load_state $state
