@@ -9,12 +9,12 @@ from sklearn import metrics
 
 def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
     predictions = np.array(predictions)
+    y_true = np.array(y_true)
+
     if stochastic:
         epistemic = np.var(predictions, axis=1).mean()
         aleatoric = np.mean(predictions * (1. - predictions))
         predictions = np.mean(predictions, axis=1)
-
-    crossentropy = np.mean(y_true * np.log(1/predictions) + (1-y_true) * np.log(1/(1-predictions)))
 
     if len(predictions.shape) == 1:
         predictions = np.stack([1 - predictions, predictions]).transpose((1, 0))
@@ -25,6 +25,7 @@ def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
         print(cf)
     cf = cf.astype(np.float32)
 
+    crossentropy = np.mean(y_true * np.log(1/predictions[:,1]) + (1-y_true) * np.log(1/(1-predictions[:,1])))
     acc = (cf[0][0] + cf[1][1]) / np.sum(cf)
     prec0 = cf[0][0] / (cf[0][0] + cf[1][0])
     prec1 = cf[1][1] / (cf[1][1] + cf[0][1])
