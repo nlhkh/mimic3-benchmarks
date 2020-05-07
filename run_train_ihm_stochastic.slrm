@@ -10,8 +10,8 @@
 
 dropout=$1
 rdropout=$2
-state=${3:-''}
-train_size=$4
+train_size=$3
+state=${4:-''}
 
 if [ -z $train_size ]
 then
