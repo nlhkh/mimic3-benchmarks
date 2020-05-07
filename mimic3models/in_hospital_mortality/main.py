@@ -165,7 +165,7 @@ elif args.mode == 'test':
     del train_raw
     del val_raw
 
-    test_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'test'),
+    test_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, args.test_dir),
                                             listfile=os.path.join(args.data, 'test_listfile.csv'),
                                             period_length=48.0)
     ret = utils.load_data(test_reader, discretizer, normalizer, args.small_part,
