@@ -23,6 +23,7 @@ def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
         print(cf)
     cf = cf.astype(np.float32)
 
+    crossentropy = np.mean(y_true * np.log(1/predictions) + (1-y_true) * np.log(1/(1-predictions)))
     acc = (cf[0][0] + cf[1][1]) / np.sum(cf)
     prec0 = cf[0][0] / (cf[0][0] + cf[1][0])
     prec1 = cf[1][1] / (cf[1][1] + cf[0][1])
@@ -35,6 +36,7 @@ def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
     minpse = np.max([min(x, y) for (x, y) in zip(precisions, recalls)])
 
     if verbose:
+        print("entropy = {}".format(crossentropy))
         print("accuracy = {}".format(acc))
         print("precision class 0 = {}".format(prec0))
         print("precision class 1 = {}".format(prec1))
@@ -49,7 +51,8 @@ def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
             print("Aleatoric uncertainty = {}".format(aleatoric))
             print("Uncertainty = {}".format(epistemic + aleatoric))
 
-    stats = {"acc": acc,
+    stats = {"entropy": crossentropy,
+            "acc": acc,
             "prec0": prec0,
             "prec1": prec1,
             "rec0": rec0,

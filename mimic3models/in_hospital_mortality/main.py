@@ -35,7 +35,7 @@ target_repl = (args.target_repl_coef > 0.0 and args.mode == 'train')
 
 # Build readers, discretizers, normalizers
 train_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'train'),
-                                         listfile=os.path.join(args.data, 'train_listfile.csv'),
+                                         listfile=os.path.join(args.data, args.train_listfile),
                                          period_length=48.0)
 
 val_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'train'),

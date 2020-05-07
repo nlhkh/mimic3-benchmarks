@@ -4,10 +4,12 @@ miscellaneous
 notebook
 .DS_Store
 settings.json
+.vscode
 
 # data
 data
 slurm-*.out
+/k_*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

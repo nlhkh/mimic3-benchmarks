@@ -24,8 +24,8 @@ class StochasticLSTM(LSTM):
     def build(self, input_shape):
         super().build(input_shape)
         
-        reg = 1e-6
-        dropout_reg = 1e-5
+        reg = 1/14681
+        dropout_reg = 2/14681
         def dropout_constraint(p):
             """Constraint probability between 0.0 and 1.0"""
             return K.clip(p, K.epsilon(), 1. - K.epsilon())
