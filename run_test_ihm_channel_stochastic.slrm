@@ -18,4 +18,4 @@ source activate mimic3
 srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/channel_wise_lstms_dropout.py \
             --dim 8 --timestep 1.0 --depth 1 --dropout $dropout --rec_dropout $rdropout --mode test --batch_size 8 \
             --output_dir mimic3models/in_hospital_mortality --size_coef 4.0 --mc 10 \
-            --load_state $state
+            --load_state "$state"
