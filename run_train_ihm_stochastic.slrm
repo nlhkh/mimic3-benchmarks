@@ -10,7 +10,7 @@
 
 dropout=$1
 rdropout=$2
-epochs≈${3:-100}
+epochs≈${3:-'100'}
 train_size=$4
 state=${5:-''}
 
@@ -29,4 +29,4 @@ source activate mimic3
 srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/lstm_dropout.py \
             --dim 16 --timestep 1.0 --depth 2 --dropout $dropout --rec_dropout $rdropout --mode train \
             --batch_size 8 --output_dir $output_dir \
-            --load_state "$state" --train_listfile $train_listfile --epochs $epochs
+            --load_state "$state" --train_listfile $train_listfile --epochs "$epochs"

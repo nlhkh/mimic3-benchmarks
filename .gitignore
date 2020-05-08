@@ -8,8 +8,7 @@ settings.json
 
 # data
 data
-slurm-*.out
-/k_*.csv
+/training_logs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
