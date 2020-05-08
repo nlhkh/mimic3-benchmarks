@@ -25,7 +25,7 @@ def print_metrics_binary(y_true, predictions, stochastic=False, verbose=1):
         print(cf)
     cf = cf.astype(np.float32)
 
-    crossentropy = np.mean(y_true * np.log(1/predictions[:,1]) + (1-y_true) * np.log(1/(1-predictions[:,1])))
+    crossentropy = np.mean(y_true * np.log(1/predictions[:,1]) + (1-y_true) * np.log(1/(predictions[:,0])))
     acc = (cf[0][0] + cf[1][1]) / np.sum(cf)
     prec0 = cf[0][0] / (cf[0][0] + cf[1][0])
     prec1 = cf[1][1] / (cf[1][1] + cf[0][1])
