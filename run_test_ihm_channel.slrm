@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -t 08:00:00
+#SBATCH -t 00:30:00
 #SBATCH -n 1
 #SBATCH --gres=gpu:1
 #SBATCH -C 'pascal|kepler|volta'
@@ -8,7 +8,7 @@
 #SBATCH --mail-user=kha.nguyen@aalto.fi
 #SBATCH -p gpu
 
-state=${1:-''}
+state=$1
 
 module load anaconda3
 source activate mimic3
@@ -16,4 +16,4 @@ source activate mimic3
 srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/channel_wise_lstms.py \
             --dim 8 --timestep 1.0 --depth 1 --dropout 0.3 --mode test --batch_size 8 \
             --output_dir mimic3models/in_hospital_mortality --size_coef 4.0 \
-            --load_state "$state"
+            --load_state $state

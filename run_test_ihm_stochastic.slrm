@@ -9,7 +9,8 @@
 #SBATCH -p gpu
 
 dropout=$1
-state=${2:-''}
+state=$2
+test_dir=${3:-'test'}
 
 module load anaconda3
 source activate mimic3
@@ -17,4 +18,4 @@ source activate mimic3
 srun python -um mimic3models.in_hospital_mortality.main --network mimic3models/keras_models/lstm_dropout.py \
             --dim 16 --timestep 1.0 --depth 2 --dropout $dropout --rec_dropout $dropout --mode test \
             --batch_size 8 --output_dir mimic3models/in_hospital_mortality --mc 10 \
-            --load_state "$state"
+            --load_state $state --test_dir $test_dir
